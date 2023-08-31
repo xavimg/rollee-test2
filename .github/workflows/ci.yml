@@ -18,5 +18,16 @@ jobs:
       with:
         go-version: 1.19.2
 
-    - name: Run tests
-      run: go test ./internal/...
+    - name: Run tests and generate coverage
+      run: |
+        go test -coverprofile=coverage.txt -covermode=atomic ./internal/...
+
+    - name: Check coverage
+      run: |
+        coverage=$(go tool cover -func=coverage.txt | grep -oP "^total:\s+\K\d+(\.\d+)?")
+        if (( $(echo "$coverage >= 60" | bc -l) )); then
+          echo "Coverage is above 60% ($coverage%)"
+        else
+          echo "Coverage is below 60% ($coverage%), failing the build"
+          exit 1
+        fi
