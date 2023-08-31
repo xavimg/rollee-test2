@@ -1,16 +1,3 @@
-# Installation
-
-Run this command in root folder repository to build the Dockerfile
-
-```bash
-  make docker-build
-```
-Run this command to run the program from docker image builded
-
-```bash
-  make docker-run
-```
-
 # instructions
 
 Write an http service that will accept 2 endpoints:
@@ -39,4 +26,17 @@ Bonus points:
 - Use docker
 - Scalability
 - Performances
+
+# Installation
+
+Run this command in root folder repository to build the Dockerfile
+
+```bash
+  make docker-build
+```
+Run this command to run the program from docker image builded
+
+```bash
+  make docker-run
+```
 
