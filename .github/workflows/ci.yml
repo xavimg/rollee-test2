@@ -31,3 +31,6 @@ jobs:
           echo "Coverage is below 60% ($coverage%), failing the build"
           exit 1
         fi
+      shell: bash
+      env:
+        GOROOT: /opt/hostedtoolcache/go/1.19.2/x64
