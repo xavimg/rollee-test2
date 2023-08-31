@@ -54,3 +54,33 @@ func TestFindFrequentByPrefix(t *testing.T) {
 		t.Error("Expected an error for prefix not found, got nil")
 	}
 }
+
+func TestCleanGarbageCollector(t *testing.T) {
+	// Short interval for testing
+	gcInterval := 100 * time.Millisecond
+
+	store := NewInMemoryStore(gcInterval)
+	store.wordsStore["apple"] = 1
+	store.wordsStore["banana"] = 1
+	store.wordsStore["cherry"] = 2
+
+	// Wait for longer than gcInterval to ensure the garbage collector has run
+	time.Sleep(2 * gcInterval)
+
+	store.mux.RLock()
+	defer store.mux.RUnlock()
+
+	// "apple" and "banana" should be deleted by garbage collector
+	if _, exists := store.wordsStore["apple"]; exists {
+		t.Error("Expected 'apple' to be removed by garbage collector")
+	}
+
+	if _, exists := store.wordsStore["banana"]; exists {
+		t.Error("Expected 'banana' to be removed by garbage collector")
+	}
+
+	// "cherry" has count > 1 so should not be removed
+	if _, exists := store.wordsStore["cherry"]; !exists {
+		t.Error("Expected 'cherry' to remain in store")
+	}
+}
