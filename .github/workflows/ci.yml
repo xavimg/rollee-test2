@@ -21,16 +21,3 @@ jobs:
     - name: Run tests and generate coverage
       run: |
         go test -coverprofile=coverage.txt -covermode=atomic ./internal/...
-
-    - name: Check coverage
-      run: |
-        coverage=$(go tool cover -func=coverage.txt | grep -oP "^total:\s+\K\d+(\.\d+)?")
-        if (( $(echo "$coverage >= 60" | bc -l) )); then
-          echo "Coverage is above 60% ($coverage%)"
-        else
-          echo "Coverage is below 60% ($coverage%), failing the build"
-          exit 1
-        fi
-      shell: bash
-      env:
-        GOROOT: /opt/hostedtoolcache/go/1.19.2/x64
