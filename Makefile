@@ -8,7 +8,7 @@ docker-build:
 docker-run:
 	docker run -p 3001:3001 word-service
 
-test-and-coverage:
+test:
 	go clean -testcache && go test ./internal/... && go test -coverprofile=coverage.out ./internal/...
 
 .PHONY: words-service docker-build docker-run test-and-coverage

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+
 	"words/internal/service"
 
 	"github.com/go-chi/chi"

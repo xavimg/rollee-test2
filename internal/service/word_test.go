@@ -7,7 +7,6 @@ import (
 
 // MockWordStorer is a mock implementation of the WordStorer interface.
 type MockWordStorer struct {
-	words      map[string]int
 	insertErr  error
 	findErr    error
 	frequentBy string

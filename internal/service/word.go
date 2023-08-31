@@ -2,14 +2,15 @@ package service
 
 import (
 	"strings"
-	"words/internal/store"
+
+	"words/internal/storage"
 )
 
 type WordService struct {
-	wordStore store.WordStorer
+	wordStore storage.WordStorager
 }
 
-func NewWordService(s store.WordStorer) *WordService {
+func NewWordService(s storage.WordStorager) *WordService {
 	return &WordService{wordStore: s}
 }
 
