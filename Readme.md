@@ -60,3 +60,11 @@ Run this command to run the program from docker image builded
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `prefix`      | `string` | Eg: "ap" |
+
+## Running Tests
+
+To run tests, run the following command
+
+```bash
+  make test-and-coverage
+```
