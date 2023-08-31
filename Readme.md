@@ -39,4 +39,24 @@ Run this command to run the program from docker image builded
 ```bash
   make docker-run
 ```
+## API Reference
 
+#### Insert a new word
+
+```http
+  POST /api/v0.1/words/${word}
+```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `word` | `string` | Eg: "apple" |
+
+#### Get the most frequent word using a prefix
+
+```http
+  GET /api/v0.1/words/${prefix}
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `prefix`      | `string` | Eg: "ap" |
