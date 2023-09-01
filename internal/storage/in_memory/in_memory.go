@@ -36,8 +36,6 @@ func NewInMemoryStorage(GcInterval time.Duration) *InMemoryStorage {
 		GcInterval:   GcInterval,
 	}
 
-	// go storage.CleanGarbageCollector()
-
 	return storage
 }
 

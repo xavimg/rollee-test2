@@ -120,6 +120,8 @@ func TestCleanGarbageCollector(t *testing.T) {
 	storage.WordsStorage["banana"] = 3
 	storage.WordsStorage["cherry"] = 10
 
+	go storage.CleanGarbageCollector()
+
 	// Wait for longer than gcInterval to ensure the garbage collector has run
 	time.Sleep(2 * gcInterval)
 
