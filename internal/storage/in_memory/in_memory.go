@@ -1,4 +1,4 @@
-package storage
+package in_memory
 
 import (
 	"fmt"
@@ -23,25 +23,25 @@ const (
 // error scenarios during the Insert() operation.
 var forbiddenWords = []string{"bad", "words", "example"}
 
-type InMemoryStore struct {
-	WordsStore map[string]int
+type InMemoryStorage struct {
+	WordsStorage map[string]int
 
 	mu         sync.RWMutex
 	GcInterval time.Duration
 }
 
-func NewInMemoryStore(GcInterval time.Duration) *InMemoryStore {
-	store := &InMemoryStore{
-		WordsStore: make(map[string]int, 0),
-		GcInterval: GcInterval,
+func NewInMemoryStorage(GcInterval time.Duration) *InMemoryStorage {
+	storage := &InMemoryStorage{
+		WordsStorage: make(map[string]int, 0),
+		GcInterval:   GcInterval,
 	}
 
-	go store.cleanGarbageCollector()
+	// go storage.CleanGarbageCollector()
 
-	return store
+	return storage
 }
 
-func (s *InMemoryStore) Insert(word string) error {
+func (s *InMemoryStorage) Insert(word string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -52,18 +52,18 @@ func (s *InMemoryStore) Insert(word string) error {
 		}
 	}
 
-	s.WordsStore[word]++
+	s.WordsStorage[word]++
 	log.Info().Msgf(logWordAddINFO, word)
 	return nil
 }
 
-func (s *InMemoryStore) FindFrequentByPrefix(prefix string) (string, error) {
+func (s *InMemoryStorage) FindFrequentByPrefix(prefix string) (string, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	var maxWord string
 	var maxCount int
-	for word, count := range s.WordsStore {
+	for word, count := range s.WordsStorage {
 		if strings.HasPrefix(word, prefix) && count > maxCount {
 			maxWord = word
 			maxCount = count
@@ -80,18 +80,18 @@ func (s *InMemoryStore) FindFrequentByPrefix(prefix string) (string, error) {
 // cleanGarbageCollector trims infrequent words (e.g., count of 3 for testing challenge, but 500 in real scenarios)
 // from InMemoryStore to save memory and enhance performance.
 // Especially useful when storage swells, limiting iteration overhead over vast entries like 10,000 words.
-func (s *InMemoryStore) cleanGarbageCollector() {
+func (s *InMemoryStorage) CleanGarbageCollector() {
 	ticker := time.NewTicker(s.GcInterval)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
 			log.Info().Msg(logCleanGC)
-			log.Info().Msgf(logStorage, s.WordsStore)
+			log.Info().Msgf(logStorage, s.WordsStorage)
 			s.mu.Lock()
-			for word := range s.WordsStore {
-				if s.WordsStore[word] == 3 {
-					delete(s.WordsStore, word)
+			for word := range s.WordsStorage {
+				if s.WordsStorage[word] == 3 {
+					delete(s.WordsStorage, word)
 				}
 			}
 			s.mu.Unlock()

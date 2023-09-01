@@ -1,33 +1,26 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+	"words/internal/service/word"
+	"words/internal/storage/in_memory"
 
 	"github.com/go-chi/chi"
 )
 
-type MockWordService struct {
-	addWordErr             error
-	getMostFrequentByError error
-	frequentWord           string
-}
-
-func (m *MockWordService) AddWord(word string) error {
-	return m.addWordErr
-}
-
-func (m *MockWordService) GetMostFrequentByPrefix(prefix string) (string, error) {
-	if m.getMostFrequentByError != nil {
-		return "", m.getMostFrequentByError
-	}
-	return m.frequentWord, nil
-}
+const (
+	testWord               = "testword"
+	gci      time.Duration = 20 * time.Second
+)
 
 func TestAddWord(t *testing.T) {
-	mockService := &MockWordService{}
+	repository := in_memory.NewInMemoryStorage(gci)
+	mockService := &word.WordService{
+		Repository: repository,
+	}
 	handler := NewHandler(mockService)
 	r := chi.NewRouter()
 
@@ -42,8 +35,8 @@ func TestAddWord(t *testing.T) {
 	}
 
 	// Test error on add
-	expectedError := errors.New("mock add error")
-	mockService.addWordErr = expectedError
+	// expectedError := errors.New("mock add error")
+
 	req, _ = http.NewRequest("POST", "/words/testword", nil)
 	rec = httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
@@ -53,8 +46,9 @@ func TestAddWord(t *testing.T) {
 }
 
 func TestFrequentWordByPrefix(t *testing.T) {
-	mockService := &MockWordService{
-		frequentWord: "testword",
+	repository := in_memory.NewInMemoryStorage(gci)
+	mockService := &word.WordService{
+		Repository: repository,
 	}
 	handler := NewHandler(mockService)
 	r := chi.NewRouter()
@@ -68,13 +62,11 @@ func TestFrequentWordByPrefix(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Errorf("expected status code %d, got %d", http.StatusOK, rec.Code)
 	}
-	if rec.Body.String() != "testword" {
-		t.Errorf("expected word 'testword', got %s", rec.Body.String())
+	if rec.Body.String() != testWord {
+		t.Errorf("expected word '%s', got %s", testWord, rec.Body.String())
 	}
 
 	// Test error on find
-	expectedError := errors.New("mock find error")
-	mockService.getMostFrequentByError = expectedError
 	req, _ = http.NewRequest("GET", "/words/test", nil)
 	rec = httptest.NewRecorder()
 	r.ServeHTTP(rec, req)

@@ -1,4 +1,4 @@
-package service
+package word
 
 import (
 	"errors"

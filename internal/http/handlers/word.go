@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"words/internal/service"
+	"words/internal/service/word"
 
 	"github.com/go-chi/chi"
 	"github.com/rs/zerolog/log"
@@ -26,10 +26,10 @@ const (
 )
 
 type WordHandler struct {
-	wordService service.WordServicer
+	wordService *word.WordService
 }
 
-func NewHandler(s service.WordServicer) *WordHandler {
+func NewHandler(s *word.WordService) *WordHandler {
 	return &WordHandler{wordService: s}
 }
 

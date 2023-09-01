@@ -1,15 +1,13 @@
-package server
+package http
 
 import (
 	"context"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
-	"words/internal/handlers"
-	"words/internal/service"
+	"words/internal/config"
+	"words/internal/http/handlers"
 	"words/internal/storage"
 
 	"github.com/go-chi/chi"
@@ -17,26 +15,35 @@ import (
 )
 
 type ServerHTTP struct {
+	ctx       context.Context
+	ctxCancel context.CancelFunc
+
 	addr   string
 	router *chi.Mux
 	server *http.Server
 
-	handlers *handlers.WordHandler
-	service  service.WordServicer
-	storage  storage.WordStorager
+	handlers   *handlers.WordHandler
+	repository storage.WordRepository
 
 	stopChan chan os.Signal
 	errChan  chan error
 }
 
-func NewHTTP(addr string, gci time.Duration, storage storage.WordStorager, service service.WordServicer, handler *handlers.WordHandler) *ServerHTTP {
+// NewHTTP accepting interface for storage, it offers the flexibility
+// to easily switch between different implementations. For instance, we can effortlessly swap our
+// InMemoryStore with a PostgreSQLStore or even replace the WordService with another service implementation,
+// ensuring a high level of decoupling and adaptability.
+func NewHTTP(ctx context.Context, gci time.Duration, repository storage.WordRepository, handler *handlers.WordHandler) *ServerHTTP {
+	addr := config.Settings.Api.Port
+	ctx, ctxCancel := context.WithCancel(ctx)
 	router := chi.NewRouter()
 	return &ServerHTTP{
-		addr:     addr,
-		router:   router,
-		handlers: handler,
-		service:  service,
-		storage:  storage,
+		ctx:        ctx,
+		ctxCancel:  ctxCancel,
+		addr:       addr,
+		router:     router,
+		handlers:   handler,
+		repository: repository,
 	}
 }
 
@@ -48,7 +55,6 @@ func (s *ServerHTTP) Start() error {
 
 	s.stopChan = make(chan os.Signal, 1)
 	s.errChan = make(chan error, 1)
-	signal.Notify(s.stopChan, os.Interrupt, syscall.SIGTERM)
 
 	s.server = &http.Server{
 		Addr:    s.addr,
@@ -57,24 +63,18 @@ func (s *ServerHTTP) Start() error {
 	go func() {
 		log.Info().Msgf("starting server on port %s", s.addr) // Log right after successful binding
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			s.errChan <- err
+			log.Fatal().Msgf("Failed to start the server: %v", err)
 			return
 		}
 	}()
 
 	select {
-	case <-s.stopChan:
-		signal.Stop(s.stopChan)
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		if err := s.server.Shutdown(ctx); err != nil {
+	case <-s.ctx.Done():
+		if err := s.server.Shutdown(s.ctx); err != nil {
 			log.Error().Msgf("server shutdown error: %v", err)
 		}
 		log.Info().Msg("server gracefully closed")
 		return nil
-	case err := <-s.errChan:
-		return err
 	}
 }
 

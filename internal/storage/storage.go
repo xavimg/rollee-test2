@@ -1,7 +1,7 @@
 package storage
 
-// Storer is anything that can store words into a storage.
-type WordStorager interface {
+// WordRepository is anything that can store words into a storage.
+type WordRepository interface {
 	Insert(word string) error
 	FindFrequentByPrefix(prefix string) (string, error)
 }

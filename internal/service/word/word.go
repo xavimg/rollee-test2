@@ -1,4 +1,4 @@
-package service
+package word
 
 import (
 	"strings"
@@ -7,19 +7,19 @@ import (
 )
 
 type WordService struct {
-	wordStore storage.WordStorager
+	Repository storage.WordRepository
 }
 
-func NewWordService(s storage.WordStorager) *WordService {
-	return &WordService{wordStore: s}
+func NewWordService(repo storage.WordRepository) *WordService {
+	return &WordService{Repository: repo}
 }
 
 func (ws *WordService) AddWord(word string) error {
 	word = strings.ToLower(word)
-	return ws.wordStore.Insert(word)
+	return ws.Repository.Insert(word)
 }
 
 func (ws *WordService) GetMostFrequentByPrefix(prefix string) (string, error) {
 	prefix = strings.ToLower(prefix)
-	return ws.wordStore.FindFrequentByPrefix(prefix)
+	return ws.Repository.FindFrequentByPrefix(prefix)
 }
