@@ -123,10 +123,9 @@ func TestCleanGarbageCollector(t *testing.T) {
 	// Wait for longer than gcInterval to ensure the garbage collector has run
 	time.Sleep(2 * gcInterval)
 
-	store.mux.RLock()
-	defer store.mux.RUnlock()
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
-	// "apple" and "banana" should be deleted by garbage collector
 	if _, exists := store.WordsStore["apple"]; exists {
 		t.Error("Expected 'apple' to be removed by garbage collector")
 	}
@@ -135,7 +134,6 @@ func TestCleanGarbageCollector(t *testing.T) {
 		t.Error("Expected 'banana' to be removed by garbage collector")
 	}
 
-	// "cherry" has count > 1 so should not be removed
 	if _, exists := store.WordsStore["cherry"]; !exists {
 		t.Error("Expected 'cherry' to remain in store")
 	}

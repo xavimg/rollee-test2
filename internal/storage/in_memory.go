@@ -26,7 +26,7 @@ var forbiddenWords = []string{"bad", "words", "example"}
 type InMemoryStore struct {
 	WordsStore map[string]int
 
-	mux        sync.RWMutex
+	mu         sync.RWMutex
 	GcInterval time.Duration
 }
 
@@ -42,8 +42,8 @@ func NewInMemoryStore(GcInterval time.Duration) *InMemoryStore {
 }
 
 func (s *InMemoryStore) Insert(word string) error {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// Simulated error for this challenge
 	for _, w := range forbiddenWords {
@@ -58,8 +58,8 @@ func (s *InMemoryStore) Insert(word string) error {
 }
 
 func (s *InMemoryStore) FindFrequentByPrefix(prefix string) (string, error) {
-	s.mux.RLock()
-	defer s.mux.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	var maxWord string
 	var maxCount int
@@ -88,13 +88,13 @@ func (s *InMemoryStore) cleanGarbageCollector() {
 		case <-ticker.C:
 			log.Info().Msg(logCleanGC)
 			log.Info().Msgf(logStorage, s.WordsStore)
-			s.mux.Lock()
+			s.mu.Lock()
 			for word := range s.WordsStore {
 				if s.WordsStore[word] == 3 {
 					delete(s.WordsStore, word)
 				}
 			}
-			s.mux.Unlock()
+			s.mu.Unlock()
 		}
 	}
 }
