@@ -60,9 +60,9 @@ func TestCleanGarbageCollector(t *testing.T) {
 	gcInterval := 100 * time.Millisecond
 
 	store := NewInMemoryStore(gcInterval)
-	store.WordsStore["apple"] = 1
-	store.WordsStore["banana"] = 1
-	store.WordsStore["cherry"] = 2
+	store.WordsStore["apple"] = 3
+	store.WordsStore["banana"] = 3
+	store.WordsStore["cherry"] = 10
 
 	// Wait for longer than gcInterval to ensure the garbage collector has run
 	time.Sleep(2 * gcInterval)
