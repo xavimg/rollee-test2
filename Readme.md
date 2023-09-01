@@ -23,9 +23,9 @@ GET /service/prefix="d"     => response: null
 The service must be written in Go, expect that there is no restrictions in terms of technologies or designs
 
 Bonus points:
-- Use docker
-- Scalability
-- Performances
+- Use docker --> I used Docker
+- Scalability --> The system is built with modularization in mind, allowing individual components to be easily updated or replaced. Its interface-based design facilitates seamless integration of different storage solutions or services, enabling adaptability to varying demands. The project's structured folder organization ensures clarity and ease of expansion, while Docker provides environment consistency and deployment flexibility.
+- Performances --> By employing a proactive garbage collector mechanism, the system ensures that the storage never becomes excessively large, trimming infrequent words periodically. This not only conserves memory but also ensures rapid operations, avoiding lengthy iterations over vast datasets.
 
 # Installation
 
