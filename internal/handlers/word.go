@@ -36,7 +36,7 @@ func NewHandler(s service.WordServicer) *WordHandler {
 func (h *WordHandler) AddWord(w http.ResponseWriter, r *http.Request) {
 	word := chi.URLParam(r, "word")
 
-	if ok, err := validateWordFormat(word); !ok {
+	if ok, err := validateWordFormat(word, regexPattern); !ok {
 		log.Error().Msg(err.Error())
 		if err.Error() == fmt.Sprintf(errInvalidWord, word) {
 			http.Error(w, errInvalidInput, http.StatusBadRequest)
@@ -56,7 +56,7 @@ func (h *WordHandler) AddWord(w http.ResponseWriter, r *http.Request) {
 func (h *WordHandler) FrequentWordByPrefix(w http.ResponseWriter, r *http.Request) {
 	prefix := chi.URLParam(r, "prefix")
 
-	if ok, err := validateWordFormat(prefix); !ok {
+	if ok, err := validateWordFormat(prefix, regexPattern); !ok {
 		log.Error().Msg(err.Error())
 		if err.Error() == fmt.Sprintf(errInvalidWord, prefix) {
 			http.Error(w, errInvalidInput, http.StatusBadRequest)
@@ -74,9 +74,7 @@ func (h *WordHandler) FrequentWordByPrefix(w http.ResponseWriter, r *http.Reques
 }
 
 // validateWordFormat checks if the given word matches a predefined regex pattern.
-// If the word fits the pattern, the function returns true and nil error.
-// Otherwise, it returns false and an error indicating the nature of the mismatch.
-func validateWordFormat(word string) (bool, error) {
+func validateWordFormat(word, regexPattern string) (bool, error) {
 	matched, err := regexp.MatchString(regexPattern, word)
 	if err != nil {
 		return false, fmt.Errorf(errMatchingRegex, word, err)

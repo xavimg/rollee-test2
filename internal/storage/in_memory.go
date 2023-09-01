@@ -11,6 +11,9 @@ import (
 
 const (
 	logWordAddINFO = "word %s succesfully inserted to storage"
+	logWordGetINFO = "most frequent word with this prefix '%s' is %s"
+	logCleanGC     = "cleaning the garbage collector"
+	logStorage     = "current storage: %v"
 )
 
 // forbiddenWords serves as an example list of words that are disallowed
@@ -70,28 +73,24 @@ func (s *InMemoryStore) FindFrequentByPrefix(prefix string) (string, error) {
 		return "", fmt.Errorf("word notfound")
 	}
 
-	log.Info().Msgf("the most frequent word with this prefix '%s' is %s", prefix, maxWord)
+	log.Info().Msgf(logWordGetINFO, prefix, maxWord)
 	return maxWord, nil
 }
 
-// cleanGarbageCollector periodically removes words from the InMemoryStore
-// that have a count of 1. This serves as a cleanup mechanism to free up memory
-// by removing less frequently used words. The cleanup interval is determined by
-// the `GcInterval` field of the `InMemoryStore` struct. This method should typically
-// be run as a goroutine since it will loop indefinitely, cleaning up words at the
-// specified interval. Also, we dont want to go trought so many words when we iterate
-// the map, so this helps to performance too.
+// cleanGarbageCollector trims infrequent words (e.g., count of 3 for testing challenge, but 500 in real scenarios)
+// from InMemoryStore to save memory and enhance performance.
+// Especially useful when storage swells, limiting iteration overhead over vast entries like 10,000 words.
 func (s *InMemoryStore) cleanGarbageCollector() {
 	ticker := time.NewTicker(s.GcInterval)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			log.Info().Msg("Cleaning the garbage collector")
-			log.Info().Msgf("Actual storage capacity: %v", s.WordsStore)
+			log.Info().Msg(logCleanGC)
+			log.Info().Msgf(logStorage, s.WordsStore)
 			s.mux.Lock()
 			for word := range s.WordsStore {
-				if s.WordsStore[word] == 1 {
+				if s.WordsStore[word] == 3 {
 					delete(s.WordsStore, word)
 				}
 			}

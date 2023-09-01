@@ -15,10 +15,10 @@ const (
 	addr string = ":3001" // Should be in .env variable, but because of test purposes im remaining as a constant.
 
 	// gci defines the frequency at which the cleanGarbageCollector() operates.
-	// This ensures efficient memory management and reduces the risk of memory leaks.
+	// This ensures efficient memory management due to the potentially large volume of storage.
 	// In the context of high-throughput scenarios, this interval might be set even shorter
 	// because we dont want that our in-memory storage grows a lot.
-	gci time.Duration = 3 * time.Second
+	gci time.Duration = 20 * time.Second
 )
 
 func main() {

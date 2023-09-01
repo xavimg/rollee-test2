@@ -112,7 +112,7 @@ func TestValidateWordFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := validateWordFormat(tt.word)
+			got, err := validateWordFormat(tt.word, regexPattern)
 			if (err != nil) != tt.wantError {
 				t.Errorf("validateWordFormat() error = %v, wantError %v", err, tt.wantError)
 				return
