@@ -26,7 +26,7 @@ func TestAddWord(t *testing.T) {
 
 	r.Post("/words/{word}", handler.AddWord)
 
-	// Test successful add
+	// Test successful add for the first time
 	req, _ := http.NewRequest("POST", "/words/testword", nil)
 	rec := httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
@@ -34,14 +34,12 @@ func TestAddWord(t *testing.T) {
 		t.Errorf("expected status code %d, got %d", http.StatusCreated, rec.Code)
 	}
 
-	// Test error on add
-	// expectedError := errors.New("mock add error")
-
+	// Test successful add for the second time (duplicates allowed)
 	req, _ = http.NewRequest("POST", "/words/testword", nil)
 	rec = httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
-	if rec.Code != http.StatusBadRequest {
-		t.Errorf("expected status code %d, got %d", http.StatusBadRequest, rec.Code)
+	if rec.Code != http.StatusCreated {
+		t.Errorf("expected status code %d, got %d", http.StatusCreated, rec.Code)
 	}
 }
 
@@ -53,6 +51,12 @@ func TestFrequentWordByPrefix(t *testing.T) {
 	handler := NewHandler(mockService)
 	r := chi.NewRouter()
 
+	// First, let's add a word "testword" to the repository
+	err := mockService.AddWord("testword")
+	if err != nil {
+		t.Fatalf("Failed to add word to mock service: %v", err)
+	}
+
 	r.Get("/words/{prefix}", handler.FrequentWordByPrefix)
 
 	// Test successful find
@@ -62,12 +66,12 @@ func TestFrequentWordByPrefix(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Errorf("expected status code %d, got %d", http.StatusOK, rec.Code)
 	}
-	if rec.Body.String() != testWord {
-		t.Errorf("expected word '%s', got %s", testWord, rec.Body.String())
+	if rec.Body.String() != "testword" {
+		t.Errorf("expected word '%s', got '%s'", "testword", rec.Body.String())
 	}
 
-	// Test error on find
-	req, _ = http.NewRequest("GET", "/words/test", nil)
+	// Test error on find for a non-existing prefix
+	req, _ = http.NewRequest("GET", "/words/nonexistentprefix", nil)
 	rec = httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
 	if rec.Code != http.StatusNotFound {

@@ -42,6 +42,7 @@ func (h *WordHandler) AddWord(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errInvalidInput, http.StatusBadRequest)
 			return
 		}
+		return
 	}
 
 	if err := h.wordService.AddWord(word); err != nil {
