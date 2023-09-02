@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewInMemoryStorage(t *testing.T) {
-	storage := NewInMemoryStorage(1 * time.Second)
+	storage := NewInMemoryStorage()
 
 	if storage == nil {
 		t.Error("Expected to get an InMemoryStorage, got nil")
@@ -19,7 +19,7 @@ func TestNewInMemoryStorage(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	storage := NewInMemoryStorage(1 * time.Second)
+	storage := NewInMemoryStorage()
 
 	if err := storage.Insert("good"); err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -35,13 +35,15 @@ func TestInsert(t *testing.T) {
 }
 
 func TestConcurrentInsert(t *testing.T) {
-	storage := NewInMemoryStorage(1 * time.Second)
+	storage := NewInMemoryStorage()
+
 	var wg sync.WaitGroup
 
 	concurrentInserts := 100
 	expectedCount := concurrentInserts
 
 	word := "concurrent"
+
 	wg.Add(concurrentInserts)
 
 	for i := 0; i < concurrentInserts; i++ {
@@ -61,7 +63,7 @@ func TestConcurrentInsert(t *testing.T) {
 }
 
 func TestFindFrequentByPrefix(t *testing.T) {
-	storage := NewInMemoryStorage(1 * time.Second)
+	storage := NewInMemoryStorage()
 
 	storage.WordsStorage["apple"] = 2
 	storage.WordsStorage["appetite"] = 3
@@ -83,7 +85,7 @@ func TestFindFrequentByPrefix(t *testing.T) {
 }
 
 func TestConcurrentFindFrequentByPrefix(t *testing.T) {
-	storage := NewInMemoryStorage(1 * time.Second)
+	storage := NewInMemoryStorage()
 	var wg sync.WaitGroup
 
 	storage.WordsStorage["apple"] = 2
@@ -115,7 +117,8 @@ func TestCleanGarbageCollector(t *testing.T) {
 	// Short interval for testing
 	gcInterval := 100 * time.Millisecond
 
-	storage := NewInMemoryStorage(gcInterval)
+	storage := NewInMemoryStorage()
+
 	storage.WordsStorage["apple"] = 3
 	storage.WordsStorage["banana"] = 3
 	storage.WordsStorage["cherry"] = 10

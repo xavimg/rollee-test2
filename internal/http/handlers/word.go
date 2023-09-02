@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"regexp"
 
@@ -12,17 +11,19 @@ import (
 )
 
 const (
-	errMatchingRegex   = "error matching regex for word '%s'. Error: %v"
-	errInvalidWord     = "invalid word format received: %s"
-	errInternalServer  = "internal server error"
 	errBadRequest      = "bad request"
+	errInternalServer  = "internal server error"
 	errInvalidInput    = "invalid input"
+	errInvalidWord     = "invalid word format received: %s"
+	errMatchingRegex   = "error matching regex for word '%s'. Error: %v"
 	errWordNotResolved = "word not found"
 
 	logAddWordERROR = "problem adding new word: %s. error: %v"
 	logGetWordERROR = "error retrieving word for prefix '%s'. error: %v"
 
+	prefixParam  = "prefix"
 	regexPattern = `^[a-zA-Z]+$`
+	wordParam    = "word"
 )
 
 type WordHandler struct {
@@ -34,14 +35,11 @@ func NewHandler(s *word.WordService) *WordHandler {
 }
 
 func (h *WordHandler) AddWord(w http.ResponseWriter, r *http.Request) {
-	word := chi.URLParam(r, "word")
+	word := chi.URLParam(r, wordParam)
 
 	if ok, err := validateWordFormat(word, regexPattern); !ok {
 		log.Error().Msg(err.Error())
-		if err.Error() == fmt.Sprintf(errInvalidWord, word) {
-			http.Error(w, errInvalidInput, http.StatusBadRequest)
-			return
-		}
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -55,13 +53,12 @@ func (h *WordHandler) AddWord(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WordHandler) FrequentWordByPrefix(w http.ResponseWriter, r *http.Request) {
-	prefix := chi.URLParam(r, "prefix")
+	prefix := chi.URLParam(r, prefixParam)
 
 	if ok, err := validateWordFormat(prefix, regexPattern); !ok {
 		log.Error().Msg(err.Error())
-		if err.Error() == fmt.Sprintf(errInvalidWord, prefix) {
-			http.Error(w, errInvalidInput, http.StatusBadRequest)
-		}
+		http.Error(w, errInvalidInput, http.StatusBadRequest)
+		return
 	}
 
 	word, err := h.wordService.GetMostFrequentByPrefix(prefix)
@@ -76,12 +73,5 @@ func (h *WordHandler) FrequentWordByPrefix(w http.ResponseWriter, r *http.Reques
 
 // validateWordFormat checks if the given word matches a predefined regex pattern.
 func validateWordFormat(word, regexPattern string) (bool, error) {
-	matched, err := regexp.MatchString(regexPattern, word)
-	if err != nil {
-		return false, fmt.Errorf(errMatchingRegex, word, err)
-	}
-	if !matched {
-		return false, fmt.Errorf(errInvalidWord, word)
-	}
-	return true, nil
+	return regexp.MatchString(regexPattern, word)
 }

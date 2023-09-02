@@ -7,9 +7,9 @@ RUN go mod download
 
 COPY . .
 
-ENV CONFIG_FILE=./config/config.yml
+ENV CONFIG_FILE=config.yml
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/server
 
 EXPOSE 3001
 

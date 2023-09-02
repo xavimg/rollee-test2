@@ -4,20 +4,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 	"words/internal/service/word"
 	"words/internal/storage/in_memory"
 
 	"github.com/go-chi/chi"
 )
 
-const (
-	testWord               = "testword"
-	gci      time.Duration = 20 * time.Second
-)
-
 func TestAddWord(t *testing.T) {
-	repository := in_memory.NewInMemoryStorage(gci)
+	repository := in_memory.NewInMemoryStorage()
 	mockService := &word.WordService{
 		Repository: repository,
 	}
@@ -44,7 +38,7 @@ func TestAddWord(t *testing.T) {
 }
 
 func TestFrequentWordByPrefix(t *testing.T) {
-	repository := in_memory.NewInMemoryStorage(gci)
+	repository := in_memory.NewInMemoryStorage()
 	mockService := &word.WordService{
 		Repository: repository,
 	}

@@ -3,8 +3,6 @@ package http
 import (
 	"context"
 	"net/http"
-	"os"
-	"time"
 
 	"words/internal/config"
 	"words/internal/http/handlers"
@@ -24,24 +22,20 @@ type ServerHTTP struct {
 
 	handlers   *handlers.WordHandler
 	repository storage.WordRepository
-
-	stopChan chan os.Signal
-	errChan  chan error
 }
 
 // NewHTTP accepting interface for storage, it offers the flexibility
 // to easily switch between different implementations. For instance, we can effortlessly swap our
 // InMemoryStore with a PostgreSQLStore or even replace the WordService with another service implementation,
 // ensuring a high level of decoupling and adaptability.
-func NewHTTP(ctx context.Context, gci time.Duration, repository storage.WordRepository, handler *handlers.WordHandler) *ServerHTTP {
-	addr := config.Settings.Api.Port
+func NewHTTP(ctx context.Context, repository storage.WordRepository, handler *handlers.WordHandler) *ServerHTTP {
 	ctx, ctxCancel := context.WithCancel(ctx)
-	router := chi.NewRouter()
+
 	return &ServerHTTP{
 		ctx:        ctx,
 		ctxCancel:  ctxCancel,
-		addr:       addr,
-		router:     router,
+		addr:       config.Settings.Api.Port,
+		router:     chi.NewRouter(),
 		handlers:   handler,
 		repository: repository,
 	}
@@ -53,29 +47,27 @@ func NewHTTP(ctx context.Context, gci time.Duration, repository storage.WordRepo
 func (s *ServerHTTP) Start() error {
 	s.routes()
 
-	s.stopChan = make(chan os.Signal, 1)
-	s.errChan = make(chan error, 1)
-
 	s.server = &http.Server{
 		Addr:    s.addr,
 		Handler: s.router,
 	}
+
 	go func() {
-		log.Info().Msgf("starting server on port %s", s.addr) // Log right after successful binding
+		log.Info().Msgf("starting server on port %s", s.addr)
+
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal().Msgf("Failed to start the server: %v", err)
 			return
 		}
 	}()
 
-	select {
-	case <-s.ctx.Done():
-		if err := s.server.Shutdown(s.ctx); err != nil {
-			log.Error().Msgf("server shutdown error: %v", err)
-		}
-		log.Info().Msg("server gracefully closed")
-		return nil
+	<-s.ctx.Done()
+	if err := s.server.Shutdown(s.ctx); err != nil {
+		log.Error().Msgf("server shutdown error: %v", err)
 	}
+	log.Info().Msg("server gracefully closed")
+
+	return nil
 }
 
 func (s *ServerHTTP) routes() {

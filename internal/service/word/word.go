@@ -2,7 +2,6 @@ package word
 
 import (
 	"strings"
-
 	"words/internal/storage"
 )
 
