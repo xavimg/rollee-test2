@@ -2,11 +2,12 @@ package context
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // ApplicationContext returns a cancellable background context that handles os signals (SIGKILL & SIGTEM)
@@ -21,7 +22,7 @@ func ApplicationContext() context.Context {
 	go func() {
 		<-signalChan
 
-		fmt.Println("signal captured correctly to shutdown !!")
+		log.Info().Msg("signal captured correctly to shutdown !!")
 		ctxCancel()
 
 		time.Sleep(time.Second)

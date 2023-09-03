@@ -14,8 +14,7 @@ const (
 	errWordNotFound   = "word not found"
 
 	limitWords     = 3
-	logCleanGC     = "cleaning the garbage collector"
-	logStorage     = "current storage: %v"
+	logStorage     = "cleaning the garbage collector...current storage: %v"
 	logWordAddINFO = "word %s succesfully inserted to storage"
 	logWordGetINFO = "most frequent word with this prefix '%s' is %s"
 )
@@ -91,7 +90,6 @@ func (s *InMemoryStorage) FindFrequentByPrefix(prefix string) (string, error) {
 // from InMemoryStore to save memory and enhance performance.
 // Especially useful when storage swells, limiting iteration overhead over vast entries like 10,000 words.
 func (s *InMemoryStorage) CleanGarbageCollector() {
-	log.Info().Msg(logCleanGC)
 	log.Info().Msgf(logStorage, s.WordsStorage)
 
 	s.mu.Lock()

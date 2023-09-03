@@ -11,4 +11,4 @@ docker-run:
 test:
 	go clean -testcache && go test ./internal/... && go test -coverprofile=test/coverage.out ./internal/...
 
-.PHONY: words-service docker-build docker-run test-and-coverage
+.PHONY: words-service docker-build docker-run test
