@@ -27,6 +27,7 @@ const (
 // error scenarios during the Insert() operation.
 var forbiddenWords = []string{"bad", "words", "example"}
 
+// InMemoryStorage represents an in-memory storage for words.
 type InMemoryStorage struct {
 	mu sync.RWMutex
 
@@ -41,9 +42,10 @@ func NewInMemoryStorage() *InMemoryStorage {
 	return storage
 }
 
-// TODO
+// Insert adds a word to the WordsStorage. If the word is in the list of forbidden words,
+// it returns an error. Concurrent writes to the WordsStorage are protected with a mutex.
+// The function also logs successful additions.
 func (s *InMemoryStorage) Insert(word string) error {
-	// Simulated error for this challenge
 	for _, w := range forbiddenWords {
 		if word == w {
 			return fmt.Errorf(errForbiddenWords)
@@ -59,11 +61,14 @@ func (s *InMemoryStorage) Insert(word string) error {
 	return nil
 }
 
-// TODO
+// FindFrequentByPrefix searches for the most frequent word in WordsStorage with the given prefix.
+// If no such word exists, it returns an error. Concurrent reads from the WordsStorage
+// are protected with a read mutex. The function also logs the retrieved word.
 func (s *InMemoryStorage) FindFrequentByPrefix(prefix string) (string, error) {
-	var maxWord string
-	var maxCount int
-
+	var (
+		maxWord  string
+		maxCount int
+	)
 	s.mu.RLock()
 	for word, count := range s.WordsStorage {
 		if strings.HasPrefix(word, prefix) && count > maxCount {
@@ -91,7 +96,6 @@ func (s *InMemoryStorage) CleanGarbageCollector() {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	for word := range s.WordsStorage {
 		if s.WordsStorage[word] <= limitWords {
 			delete(s.WordsStorage, word)

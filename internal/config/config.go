@@ -19,7 +19,7 @@ type Api struct {
 }
 
 func LoadSettings() error {
-	f, err := os.Open(os.Getenv("CONFIG_FILE"))
+	f, err := os.Open(os.Getenv("./config.yml"))
 	if err != nil {
 		log.Err(err)
 		return err

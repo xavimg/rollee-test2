@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"regexp"
 
@@ -12,10 +13,7 @@ import (
 
 const (
 	errBadRequest      = "bad request"
-	errInternalServer  = "internal server error"
-	errInvalidInput    = "invalid input"
-	errInvalidWord     = "invalid word format received: %s"
-	errMatchingRegex   = "error matching regex for word '%s'. Error: %v"
+	errInvalidInput    = "invalid format input received"
 	errWordNotResolved = "word not found"
 
 	logAddWordERROR = "problem adding new word: %s. error: %v"
@@ -57,7 +55,7 @@ func (h *WordHandler) FrequentWordByPrefix(w http.ResponseWriter, r *http.Reques
 
 	if ok, err := validateWordFormat(prefix, regexPattern); !ok {
 		log.Error().Msg(err.Error())
-		http.Error(w, errInvalidInput, http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -73,5 +71,13 @@ func (h *WordHandler) FrequentWordByPrefix(w http.ResponseWriter, r *http.Reques
 
 // validateWordFormat checks if the given word matches a predefined regex pattern.
 func validateWordFormat(word, regexPattern string) (bool, error) {
-	return regexp.MatchString(regexPattern, word)
+	matched, err := regexp.MatchString(regexPattern, word)
+	if err != nil {
+		return false, err
+	}
+	if !matched {
+		return false, errors.New(errInvalidInput)
+	}
+
+	return true, nil
 }
