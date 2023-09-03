@@ -9,7 +9,7 @@ COPY . .
 
 ENV CONFIG_FILE=config.yml
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd
 
 EXPOSE 3001
 

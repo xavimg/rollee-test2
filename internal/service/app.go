@@ -2,9 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"time"
-	config "words/internal/config"
+	"words/internal/config"
 	"words/internal/http"
 	"words/internal/http/handlers"
 	"words/internal/service/word"
@@ -41,9 +40,13 @@ func (s *App) Run() {
 		}
 	}()
 
+	// Gci defines the frequency at which the cleanGarbageCollector() operates.
+	// This ensures efficient memory management due to the potentially large volume of storage.
+	// In the context of high-throughput scenarios, this interval might be set even shorter
+	// because we dont want that our in-memory storage grows a lot.
 	timer, err := time.ParseDuration(s.config.Api.Gci)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 	ticker := time.NewTicker(timer)
 	defer ticker.Stop()
