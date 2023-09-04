@@ -66,31 +66,5 @@ Run this command to run the program from docker image builded
 To run tests, run the following command
 
 ```bash
-  make test-and-coverage
+  make test
 ```
-
-
-
-// gci defines the frequency at which the cleanGarbageCollector() operates.
-// This ensures efficient memory management due to the potentially large volume of storage.
-// In the context of high-throughput scenarios, this interval might be set even shorter
-// because we dont want that our in-memory storage grows a lot.
-
-## Project Structure
-
-<pre>
-
-.
-|_.github
-|  |_workflows
-|_cmd
-|  |_server
-|_config
-|_internal
-...
-
-</pre>
-
-**.github**: actions..
-  - **workflows**: ....
-**cmd**: 
