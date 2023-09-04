@@ -12,6 +12,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	logGracefully     = "server gracefully closed"
+	logServerFailed   = "Failed to start the server: %v"
+	logServerShutdown = "server shutdown error: %v"
+	logServerStarted  = "starting server on port %s"
+)
+
 type ServerHTTP struct {
 	ctx       context.Context
 	ctxCancel context.CancelFunc
@@ -53,19 +60,19 @@ func (s *ServerHTTP) Start() error {
 	}
 
 	go func() {
-		log.Info().Msgf("starting server on port %s", s.addr)
+		log.Info().Msgf(logServerStarted, s.addr)
 
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal().Msgf("Failed to start the server: %v", err)
+			log.Fatal().Msgf(logServerFailed, err)
 			return
 		}
 	}()
 
 	<-s.ctx.Done()
 	if err := s.server.Shutdown(s.ctx); err != nil {
-		log.Error().Msgf("server shutdown error: %v", err)
+		log.Error().Msgf(logServerShutdown, err)
 	}
-	log.Info().Msg("server gracefully closed")
+	log.Info().Msg(logGracefully)
 
 	return nil
 }
